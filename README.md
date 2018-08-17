@@ -28,8 +28,3 @@ There are two datasets, one is **data600.csv**, the other one is **data600_label
         Pricing       0.66      0.59      0.62       262
     
     avg / total       0.69      0.76      0.72      1529
-    
-
-# Review_Topic_Analysis
-# Review_Topic_Analysis
-"# Review_Topic_Analysis" 
