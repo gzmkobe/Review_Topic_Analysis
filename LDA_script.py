@@ -83,12 +83,13 @@ def LDA(review_data, df, n_features = 10000, length = 10, n_top_words = 25, max_
 	tf = tf_vectorizer.fit_transform(review_data)
 	tf = tf[np.array(tf.sum(1)).flatten() > length,:]
 	tf_feature_names = tf_vectorizer.get_feature_names()
-	# test = tf[tf.shape[0]-10000:]
-	# tf = tf[:tf.shape[0]-10000]
 
 	test = tf[tf.shape[0]-100000:]
 	tf = tf[:tf.shape[0]-100000]
+	file1_name = 'TF_Vectorizer_' + 'Topic'+str(n_components) + '_Feature' + str(n_features)  + '_length' + str(length) + 'max_df'+str(max_df) + 'min_df' + str(min_df) + '.pkl'
+	joblib.dump(tf_vectorizer, file1_name)	
 	print "Finished tf_vectorizer"
+
 	print "start LDA"
 	lda = LatentDirichletAllocation(n_components=n_components,
 									learning_method='online', verbose = 1, learning_decay=0.5, batch_size = 4096,
@@ -96,8 +97,7 @@ def LDA(review_data, df, n_features = 10000, length = 10, n_top_words = 25, max_
 									random_state=0, n_jobs=8)
 	
 	last_bound = 1000000
-	for it in range(10):
-	# for it in range(1):
+	for it in range(8):
 		for i, ll in enumerate(chunks(range(tf.shape[0]), 100000)):
 			lda.partial_fit(tf[ll])
 		bound = lda.perplexity(test)
@@ -107,8 +107,9 @@ def LDA(review_data, df, n_features = 10000, length = 10, n_top_words = 25, max_
 		last_bound = bound
 	print_top_words(lda, tf_feature_names, n_top_words)
 
-	file_name = 'LDA_' + 'Topic'+str(n_components) + '_Feature' + str(n_features)  + '_length' + str(length) + '.pkl'
-	joblib.dump(lda, file_name)
+
+	file2_name = 'LDA_' + 'Topic'+str(n_components) + '_Feature' + str(n_features)  + '_length' + str(length) + 'max_df'+str(max_df) + 'min_df' + str(min_df) + '.pkl'
+	joblib.dump(lda, file2_name)
 	print "Finished LDA"
 
 ######################################################################### Machine Learning part ############################################################
@@ -135,7 +136,7 @@ def LDA(review_data, df, n_features = 10000, length = 10, n_top_words = 25, max_
 
 		full_rf_pred = np.append(full_rf_pred,rf_pred, axis = 0)
 		full_y_test = np.append(full_y_test,y_test, axis = 0)
-	print '############rf#############\n',classification_report(full_y_test, full_rf_pred, target_names = target_name) 
+	print '############rf#############\n',classification_report(full_y_test, full_rf_pred, target_names = target_name, digits = 3) 
 
 	with open('classification_report.csv', 'a') as csvfile:
 		csvfile.write('\n')
@@ -148,28 +149,10 @@ def LDA(review_data, df, n_features = 10000, length = 10, n_top_words = 25, max_
 ######################################################################### Tuning Hyper-parameters ############################################################
 def grid_search(review_data, df):
 
-	# lda_grid = {'n_features':[2500,5000,15000],
-	# 'n_components':[25,50],'length':[10], 
-	# 'max_df': [0.1,0.01,0.5], 
-	# 'min_df': [0.00001]}
-
-	# rf_grid = {'max_depth': [None],
-	# 'max_features': ['sqrt'],
-	# 'min_samples_leaf': [1],
-	# 'min_samples_split': [2]}
-	lda_grid = {'n_features':[5000,7500,10000,12500,15000],
-	'n_components':[25,30,35],'length':[3,6,10], 
-	'max_df': [0.01], 
+	lda_grid = {'n_features':[15000],
+	'n_components':[31,35,40],'length':[10], 
+	'max_df': [0.04,0.05,0.06], 
 	'min_df': [0.00001]}
-
-	# rf_grid = {'max_depth': [None],
-	# 'max_features': ['sqrt'],
-	# 'min_samples_leaf': [1],
-	# 'min_samples_split': [2]}
-	# lda_grid = {'n_features':[5000,10000,15000],
-	# 'n_components':[30],'length':[3,5,7,10], 
-	# 'max_df': [0.01], 
-	# 'min_df': [0.00001]}
 
 	rf_grid = {'max_depth': [None],
 	'max_features': ['sqrt'],
@@ -194,7 +177,6 @@ def grid_search(review_data, df):
 if __name__ == '__main__':
 	with open("sample_list.txt", "rb") as fp:
 		sample_list = pickle.load(fp)
-		# sample_list = pickle.load(fp)[:110000]
 		print "Review Data Loaded"
 
 	df = process_data()
