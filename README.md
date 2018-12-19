@@ -36,8 +36,3 @@ The overall parameters have been divided in 2 categories.
     
     avg / total     0.8344    0.8273    0.8284      1529
 ```
-
-## Future Work##
-1. Setup Xgboost hyper-parameter grid search pipeline
-2. Manually label more data
-3. Tune LDA pparameters for max_df around 0.1, increase the number of features starting at 10000, and number of topics from 30 to 75.
